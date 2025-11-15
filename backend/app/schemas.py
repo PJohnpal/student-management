@@ -9,7 +9,7 @@ class UserRole(str, Enum):
     STUDENT = "student"
 
 class UserBase(BaseModel):
-    email: str
+    email: EmailStr
     full_name: str
     role: UserRole
 
