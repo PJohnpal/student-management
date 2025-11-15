@@ -9,7 +9,7 @@ class UserRole(str, Enum):
     STUDENT = "student"
 
 class UserBase(BaseModel):
-    email: EmailStr
+    email: str
     full_name: str
     role: UserRole
 
@@ -47,7 +47,7 @@ class StudentResponse(StudentBase):
         from_attributes = True
 
 class TeacherBase(BaseModel):
-    teacher_id: str
+    teacher_id: EmailStr
     department: str
     hire_date: str
     specialization: Optional[str] = None
