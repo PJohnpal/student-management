@@ -16,22 +16,41 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (token) {
-      localStorage.setItem('token', token);
-    } else {
-      localStorage.removeItem('token');
-    }
-    setLoading(false);
+    // Check if token exists and validate it
+    const validateToken = async () => {
+      if (token) {
+        try {
+          // You could add token validation here
+          const userData = JSON.parse(localStorage.getItem('userData'));
+          setUser(userData);
+        } catch (error) {
+          console.error('Token validation failed:', error);
+          logout();
+        }
+      }
+      setLoading(false);
+    };
+
+    validateToken();
   }, [token]);
 
   const login = (newToken, userData) => {
     setToken(newToken);
     setUser(userData);
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('userData', JSON.stringify(userData));
   };
 
   const logout = () => {
     setToken(null);
     setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('userData');
+  };
+
+  const updateUser = (userData) => {
+    setUser(userData);
+    localStorage.setItem('userData', JSON.stringify(userData));
   };
 
   const value = {
@@ -39,6 +58,7 @@ export const AuthProvider = ({ children }) => {
     user,
     login,
     logout,
+    updateUser,
     loading
   };
 

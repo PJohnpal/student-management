@@ -1,1 +1,1 @@
-# Empty file to make app a package
+# Empty file - makes app a package

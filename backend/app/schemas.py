@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from datetime import datetime, date
+from datetime import datetime
 from typing import Optional, List
 from enum import Enum
 
@@ -8,14 +8,16 @@ class UserRole(str, Enum):
     TEACHER = "teacher"
     STUDENT = "student"
 
-# User Schemas
 class UserBase(BaseModel):
     email: EmailStr
     full_name: str
     role: UserRole
 
-class UserCreate(UserBase):
+class UserCreate(BaseModel):
+    email: EmailStr
     password: str
+    full_name: str
+    role: UserRole = UserRole.STUDENT
 
 class UserResponse(UserBase):
     id: int
@@ -24,13 +26,12 @@ class UserResponse(UserBase):
     class Config:
         from_attributes = True
 
-# Student Schemas
 class StudentBase(BaseModel):
     student_id: str
-    date_of_birth: date
+    date_of_birth: str
     address: Optional[str] = None
     phone: Optional[str] = None
-    enrollment_date: date
+    enrollment_date: str
 
 class StudentCreate(StudentBase):
     email: EmailStr
@@ -45,11 +46,10 @@ class StudentResponse(StudentBase):
     class Config:
         from_attributes = True
 
-# Teacher Schemas
 class TeacherBase(BaseModel):
     teacher_id: str
     department: str
-    hire_date: date
+    hire_date: str
     specialization: Optional[str] = None
 
 class TeacherCreate(TeacherBase):
@@ -65,7 +65,6 @@ class TeacherResponse(TeacherBase):
     class Config:
         from_attributes = True
 
-# Course Schemas
 class CourseBase(BaseModel):
     course_code: str
     course_name: str
@@ -78,12 +77,10 @@ class CourseCreate(CourseBase):
 class CourseResponse(CourseBase):
     id: int
     teacher_id: int
-    teacher: TeacherResponse
 
     class Config:
         from_attributes = True
 
-# Enrollment Schemas
 class EnrollmentBase(BaseModel):
     student_id: int
     course_id: int
@@ -94,14 +91,13 @@ class EnrollmentCreate(EnrollmentBase):
 
 class EnrollmentResponse(EnrollmentBase):
     id: int
-    enrollment_date: date
+    enrollment_date: datetime
     student: StudentResponse
     course: CourseResponse
 
     class Config:
         from_attributes = True
 
-# Grade Schemas
 class GradeBase(BaseModel):
     student_id: int
     course_id: int
@@ -120,18 +116,18 @@ class GradeResponse(GradeBase):
     class Config:
         from_attributes = True
 
-# Auth Schemas
 class Token(BaseModel):
     access_token: str
     token_type: str
     user: UserResponse
 
-class TokenData(BaseModel):
-    user_id: Optional[int] = None
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
 
-# Dashboard Stats
 class DashboardStats(BaseModel):
     total_students: int
     total_teachers: int
     total_courses: int
-    recent_enrollments: List[EnrollmentResponse]
+    total_enrollments: int
+    recent_activity: List[dict]

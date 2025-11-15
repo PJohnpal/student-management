@@ -1,0 +1,31 @@
+import React from 'react';
+import { X } from 'lucide-react';
+
+const Modal = ({ isOpen, onClose, title, children, size = 'md' }) => {
+  if (!isOpen) return null;
+
+  const sizeClasses = {
+    sm: 'max-w-md',
+    md: 'max-w-2xl',
+    lg: 'max-w-4xl',
+    xl: 'max-w-6xl'
+  };
+
+  return (
+    <div className="modal-overlay">
+      <div className={`modal ${sizeClasses[size]}`}>
+        <div className="modal-header">
+          <h2>{title}</h2>
+          <button className="close-btn" onClick={onClose}>
+            <X size={20} />
+          </button>
+        </div>
+        <div className="modal-content">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Modal;

@@ -1,15 +1,24 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from .config import settings
+import os
+from supabase import create_client, Client
+from dotenv import load_dotenv
 
-engine = create_engine(settings.DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+load_dotenv()
 
-def get_db():
-    db = SessionLocal()
+# Supabase configuration
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+# Initialize Supabase client
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+def test_connection():
     try:
-        yield db
-    finally:
-        db.close()
+        result = supabase.table("users").select("count", count="exact").execute()
+        print("✅ Supabase connected successfully!")
+        return True
+    except Exception as e:
+        print(f"❌ Supabase connection failed: {e}")
+        return False
+
+# Test connection on import
+test_connection()

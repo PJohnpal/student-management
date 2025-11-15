@@ -1,0 +1,430 @@
+import React, { useState, useEffect } from 'react';
+import { Award, Plus, Search, User, BookOpen, Filter } from 'lucide-react';
+import LoadingSpinner from '../components/LoadingSpinner';
+import Modal from '../components/Modal';
+import { getGradeColor, getGradeLetter, formatDate } from '../utils/helpers';
+
+const Grades = () => {
+  const [grades, setGrades] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterCourse, setFilterCourse] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    student_id: '',
+    course_id: '',
+    grade: '',
+    semester: 'Fall 2024',
+    academic_year: '2024-2025'
+  });
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      // Simulate API calls
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mock data
+      setGrades([
+        {
+          id: 1,
+          student_id: 1,
+          course_id: 1,
+          grade: 85.5,
+          semester: 'Fall 2024',
+          academic_year: '2024-2025',
+          student: {
+            id: 1,
+            student_id: 'S001',
+            user: { full_name: 'John Doe' }
+          },
+          course: {
+            id: 1,
+            course_code: 'CS101',
+            course_name: 'Introduction to Programming'
+          }
+        },
+        {
+          id: 2,
+          student_id: 2,
+          course_id: 2,
+          grade: 92.0,
+          semester: 'Fall 2024',
+          academic_year: '2024-2025',
+          student: {
+            id: 2,
+            student_id: 'S002',
+            user: { full_name: 'Jane Smith' }
+          },
+          course: {
+            id: 2,
+            course_code: 'MATH101',
+            course_name: 'Calculus I'
+          }
+        }
+      ]);
+
+      setStudents([
+        { id: 1, student_id: 'S001', user: { full_name: 'John Doe' } },
+        { id: 2, student_id: 'S002', user: { full_name: 'Jane Smith' } }
+      ]);
+
+      setCourses([
+        { id: 1, course_code: 'CS101', course_name: 'Introduction to Programming' },
+        { id: 2, course_code: 'MATH101', course_name: 'Calculus I' },
+        { id: 3, course_code: 'PHY101', course_name: 'Physics I' }
+      ]);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredGrades = grades.filter(grade =>
+    (grade.student?.user?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     grade.course?.course_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     grade.course?.course_code?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (filterCourse === '' || grade.course_id.toString() === filterCourse)
+  );
+
+  const handleInputChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('Grade data:', formData);
+      setIsModalOpen(false);
+      setFormData({ 
+        student_id: '', 
+        course_id: '', 
+        grade: '', 
+        semester: 'Fall 2024', 
+        academic_year: '2024-2025' 
+      });
+      fetchData(); // Refresh data
+    } catch (error) {
+      console.error('Error creating grade:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="container">
+        <LoadingSpinner text="Loading grades..." />
+      </div>
+    );
+  }
+
+  return (
+    <div className="container">
+      <div style={{ padding: '2rem 0' }}>
+        <div className="card-header">
+          <h1>
+            <Award size={24} style={{ marginRight: '0.5rem' }} />
+            Grades Management
+          </h1>
+          <button 
+            className="btn btn-success"
+            onClick={() => setIsModalOpen(true)}
+          >
+            <Plus size={18} />
+            Add Grade
+          </button>
+        </div>
+
+        {/* Search and Filter Bar */}
+        <div className="card">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div style={{ position: 'relative' }}>
+              <Search 
+                size={20} 
+                style={{
+                  position: 'absolute',
+                  left: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#64748b'
+                }} 
+              />
+              <input
+                type="text"
+                placeholder="Search by student or course..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 1rem 0.75rem 2.5rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
+              />
+            </div>
+
+            <div style={{ position: 'relative' }}>
+              <Filter 
+                size={20} 
+                style={{
+                  position: 'absolute',
+                  left: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#64748b'
+                }} 
+              />
+              <select
+                value={filterCourse}
+                onChange={(e) => setFilterCourse(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem 1rem 0.75rem 2.5rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  backgroundColor: 'white'
+                }}
+              >
+                <option value="">All Courses</option>
+                {courses.map((course) => (
+                  <option key={course.id} value={course.id}>
+                    {course.course_code} - {course.course_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Grades Table */}
+        <div className="table-container">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Course</th>
+                <th>Grade</th>
+                <th>Letter</th>
+                <th>Semester</th>
+                <th>Academic Year</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredGrades.map((grade) => (
+                <tr key={grade.id}>
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <User size={16} color="#64748b" />
+                      <div>
+                        <div style={{ fontWeight: '600' }}>
+                          {grade.student?.user?.full_name}
+                        </div>
+                        <div style={{ fontSize: '0.875rem', color: '#64748b' }}>
+                          ID: {grade.student?.student_id}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <BookOpen size={16} color="#64748b" />
+                      <div>
+                        <div style={{ fontWeight: '600' }}>
+                          {grade.course?.course_code}
+                        </div>
+                        <div style={{ fontSize: '0.875rem', color: '#64748b' }}>
+                          {grade.course?.course_name}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span 
+                      className="badge"
+                      style={{ 
+                        backgroundColor: getGradeColor(grade.grade) + '20',
+                        color: getGradeColor(grade.grade),
+                        border: `1px solid ${getGradeColor(grade.grade)}`
+                      }}
+                    >
+                      {grade.grade}%
+                    </span>
+                  </td>
+                  <td>
+                    <span 
+                      className="badge"
+                      style={{ 
+                        backgroundColor: getGradeColor(grade.grade) + '20',
+                        color: getGradeColor(grade.grade),
+                        border: `1px solid ${getGradeColor(grade.grade)}`,
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      {getGradeLetter(grade.grade)}
+                    </span>
+                  </td>
+                  <td>{grade.semester}</td>
+                  <td>{grade.academic_year}</td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button className="btn btn-secondary" style={{ padding: '0.5rem' }}>
+                        Edit
+                      </button>
+                      <button className="btn btn-danger" style={{ padding: '0.5rem' }}>
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {filteredGrades.length === 0 && (
+                <tr>
+                  <td colSpan="7" style={{ textAlign: 'center', color: '#64748b', padding: '2rem' }}>
+                    {searchTerm || filterCourse ? 'No grades found matching your criteria' : 'No grades found'}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Add Grade Modal */}
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setFormData({ 
+              student_id: '', 
+              course_id: '', 
+              grade: '', 
+              semester: 'Fall 2024', 
+              academic_year: '2024-2025' 
+            });
+          }}
+          title="Add Grade"
+        >
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="student_id">Student *</label>
+              <select
+                id="student_id"
+                name="student_id"
+                value={formData.student_id}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Select a student</option>
+                {students.map((student) => (
+                  <option key={student.id} value={student.id}>
+                    {student.student_id} - {student.user?.full_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="course_id">Course *</label>
+              <select
+                id="course_id"
+                name="course_id"
+                value={formData.course_id}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Select a course</option>
+                {courses.map((course) => (
+                  <option key={course.id} value={course.id}>
+                    {course.course_code} - {course.course_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="grade">Grade (%) *</label>
+                <input
+                  type="number"
+                  id="grade"
+                  name="grade"
+                  value={formData.grade}
+                  onChange={handleInputChange}
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  required
+                  placeholder="Enter grade percentage"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="semester">Semester *</label>
+                <select
+                  id="semester"
+                  name="semester"
+                  value={formData.semester}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="Fall 2024">Fall 2024</option>
+                  <option value="Spring 2024">Spring 2024</option>
+                  <option value="Summer 2024">Summer 2024</option>
+                  <option value="Fall 2023">Fall 2023</option>
+                  <option value="Spring 2023">Spring 2023</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="academic_year">Academic Year *</label>
+              <select
+                id="academic_year"
+                name="academic_year"
+                value={formData.academic_year}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="2024-2025">2024-2025</option>
+                <option value="2023-2024">2023-2024</option>
+                <option value="2022-2023">2022-2023</option>
+                <option value="2021-2022">2021-2022</option>
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
+              <button 
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setIsModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit" 
+                className="btn btn-success"
+              >
+                Add Grade
+              </button>
+            </div>
+          </form>
+        </Modal>
+      </div>
+    </div>
+  );
+};
+
+export default Grades;
